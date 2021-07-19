@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.icia.pboard.dao.BoardDao">
+	<select id="count" resultType="int">
+		select /* +index_ffs(board board_pk_bno) */ count(bno) from board
+	</select>
+	
+	<select id="findAll" resultType="board">
+		<![CDATA[
+		select * from
+			(
+				select rownum as rnum, b.* from
+				(
+					select /*+ index_desc(board board_pk_bno) */bno, title, writer, writeTime, readCnt,
+					 attachmentCnt, commentCnt from board
+				) b
+				where rownum<=#{endRowNum}
+			) 
+		where rnum>=#{startRowNum}
+		]]>
+	</select>
+
+	<insert id="insert" parameterType="board">
+		<selectKey keyProperty="bno" resultType="int" order="BEFORE">
+			select board_seq.nextval from dual
+		</selectKey>
+		insert into board values(#{bno},#{title},#{content},#{writer},sysdate,0,#{attachmentCnt}, 0, 0, 0, 0)
+	</insert>
+	
+	<select id="findByBno" resultType="board">
+		select * from board where bno=#{bno} and rownum=1
+	</select>
+	
+	<resultMap type="hashmap" id="mapForAttachment">
+		<id property="ano" column="ano" />
+		<result property="bno" column="abno" />
+		<result property="originalFileName" column="originalFileName" />
+		<result property="length" column="length" />
+		<result property="isImage" column="isImage" />
+	</resultMap>
+	
+	<resultMap type="hashmap" id="mapForRead">
+		<id property="bno" column="bbno" />
+		<result property="title" column="title" />
+		<result property="content" column="content" jdbcType="CLOB" javaType="java.lang.String" />
+		<result property="writer" column="bwriter" />
+		<result property="writeTime" column="writeTime" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP" />
+		<result property="commentCnt" column="commentCnt" />
+		<result property="attachmentCnt" column="attachmentCnt" />
+		<result property="readCnt" column="readCnt" />
+		<result property="deleteCommentCnt" column="deleteCommentCnt" />
+		<result property="goodCnt" column="goodCnt" />
+		<result property="badCnt" column="badCnt" />
+		<collection property="attachments" javaType="java.util.ArrayList" resultMap="mapForAttachment" />
+	</resultMap>
+	
+	<select id="findById" resultMap="mapForRead">
+		select b.bno bbno, b.title, b.content, b.writer bwriter, b.writeTime, b.commentCnt, b.attachmentCnt,
+		b.readCnt, b.deleteCommentCnt, b.goodCnt, b.badCnt, a.ano, a.bno abno, a.originalFileName, 
+		a.length, a.isImage from board b, attachment a 
+		where b.bno=a.bno and b.bno=#{bno}
+	</select>
+	
+	<update id="update">
+		update board
+		<trim suffixOverrides="," prefix="set">
+			<if test="readCnt==1">readCnt = readCnt + 1,</if>
+		</trim>
+		where bno=#{bno} and rownum=1
+	</update>
+</mapper>
+
+
+
+

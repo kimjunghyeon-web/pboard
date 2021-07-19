@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.icia.pboard.dao.UserDao">
+	<insert id="insert">
+		insert into users(username, password,email, irum, birthday, joinday, loginFailureCnt, writeCnt, levels, profile, checkCode, enabled)
+		values(#{username}, #{password}, #{email}, #{irum}, #{birthday}, sysdate, 0, 0, #{levels}, #{profile}, #{checkCode}, 0)
+	</insert>
+	
+	<select id="findById" resultType="user">		
+		select * from users where username=#{username} and rownum=1
+	</select>
+	
+	<select id="findByEmail" resultType="user">
+		select * from users where email=#{email} and rownum=1
+	</select>
+		
+	<select id="findByCheckCode" resultType="user">
+		select * from users where checkCode=#{checkCode} and rownum=1
+	</select>
+	
+		<!-- 
+		체크코드를 확인 -> 체크코드 삭제, enabled를 변경
+		비밀번호 변경 
+		내정보 변경 : 비밀번호, 이메일, 프사
+		로그인 실패 횟수 변경
+		레벨 변경
+		글쓴 횟수 변경
+	-->
+	<update id="update">
+		update users
+		<trim suffixOverrides="," prefix="set">
+			<if test="email!=null">email=#{email},</if>
+			<if test="irum!=null">irum=#{irum},</if>
+			<if test="password!=null">password=#{password},</if>
+			<if test="profile!=null">profile=#{profile},</if>
+			<if test="checkCode!=null">checkCode=null,</if>
+			<if test="enabled!=null">enabled=#{enabled},</if>
+			<if test="loginFailureCnt!=null">loginFailureCnt=#{loginFailureCnt},</if>
+			<if test="levels!=null">levels=#{levels},</if>
+		</trim>
+		where username=#{username} and rownum=1
+	</update>
+	
+	<delete id="delete">
+		delete from users where username=#{username} and rownum=1
+	</delete>
+	
+	<delete id="deleteByCheckCodeIsNotNull">
+		delete from users where checkCode is not null
+	</delete>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

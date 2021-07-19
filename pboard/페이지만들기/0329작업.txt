@@ -1,0 +1,56 @@
+﻿첨부파일을 포함해서 글 쓰기
+- multipart설정
+	apache commons file upload
+		csrf를 사용하지 않는 경우 : root-context에 빈을 등록
+		csrf를 사용하는 경우
+			빈만드는 방법이 바뀌고 web.xml에 필터 등록
+	servlet 3.1부터 직접 지원
+		<multipart-config></multipart-config>
+
+- ckeditor
+	사진을 포함한 글을 작성하기 위해 사용
+	글을 작성할 때 자바스크립트가 포함되어 있다면 -> XSS 공격 방어
+	ck로 작성한 글을 처리 방법은 정해져 있다
+		var ck = CKEDITOR.replace('content', 업로드 경로); 
+		
+		public ResponseEntity<?> 업로드경로(MulitpartFile upload) { }
+
+		서버의 응답 : json -> {"upload":"1", "fileName":"파일명", "url":"파일보는 경로"}
+
+- 첨부 파일 저장
+	글을 먼저 저장해 시퀀스인 bno를 <selectKey>로 받아온다
+	bno를 set한 다음 첨부파일을 저장
+		이력서.hwp -> 15618684864864-이력서.hwp로 변경한 다음 저장(파일이름이 겹치지 않도록)
+		저장할 때 이름을 바꿨지만 사용자에게는 원래 파일명을 보여줘야 한다
+
+첨부파일을 포함해서 글 읽기
+- 방법
+	글을 읽고 첨부파일을 읽는다 
+		boardDao.findById(bno);
+		attachmentDao.findAll(bno);
+
+	board와 첨부파일을 조인해서 한 번에 읽어오겠다 
+		attachmentDao.findById(bno);
+		첨부파일이 없는 글이 있을 수있다 -> 외부조인(left outer join)
+			board.bno = attachment.bno and bno=22
+
+- ReadDto
+	boolean isWriter, List<Attachment> attachments를 추가해 출력
+
+비로그인
+- 편집 불가, 추천/비추 불가, 변경/삭제 불가
+로그인했고 글쓴이가 아니다
+- 편집 불가, 추천/비추 가능, 변경/삭제 불가
+로그인했고 글쓴이
+- 편집 가능, 추천/비추 불가, 변경/삭제 가능
+
+첨부파일
+- 반복문 돌리면서 ul, li로 출력
+- 첨부파일 처리 주소에 링크
+- 글쓴이인 경우 삭제 버튼 출력
+      <Context docBase="c:/upload/profile" path="/profile" reloadable="true"/>
+      <Context docBase="c:/upload/image" path="/image" reloadable="true"/>
+      <Context docBase="c:/upload/attachment" path="/attachment" reloadable="true"/>
+
+
+

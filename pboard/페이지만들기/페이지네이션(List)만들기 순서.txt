@@ -1,0 +1,16 @@
+pagin
+1. mapper에 count, findAll추가
+2. BoardDao 작성 및 Test
+3. SonarLint 다운로드(에러를 발생할수있는(노란줄)들을 정규분석해서 띄워줌)
+4. (Dto)Page 만들어줌
+5. (BoardDto) ListView 만들어줌
+6. PaginUtil 작성
+7. BoardService에서 list작성
+8. list.jsp 작성
+9. boardController list 만들기
+10. java에 lombok.config 추가
+
+모르는것 
+index_ffs(board board_pk_bno)
+index_desc(board board_pk_bno)
+static이란

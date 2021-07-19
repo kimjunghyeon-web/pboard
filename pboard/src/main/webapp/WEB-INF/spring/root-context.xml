@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy" />
+		<property name="url" value="jdbc:log4jdbc:oracle:thin:@127.0.0.1:1521:XE" />
+		<property name="username" value="spring" />
+		<property name="password" value="1234" />		
+	</bean>
+	
+	<!-- SqlSessionFactory : 설정 파일을 읽어들여 마이바티스에서 작업을 수행하는 SqlSession을 생성 -->		
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+ 		<property name="dataSource" ref="dataSource" />
+ 		<property name="mapperLocations" value="classpath:/mapper/*.xml" />
+ 		<property name="configLocation" value="classpath:/mybatis-config.xml" />
+ 	</bean>		
+ 	
+ 	<!-- SqlSessionTemplate : 마이바티스 스프링 연동 모듈을 사용해 트랜잭션 처리, open/close, 스레드 안정한 SqlSession 객체를 지원 -->
+ 	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+ 		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory" />
+ 	</bean>	
+ 	
+ 	<!-- JDBC기반 트랜잭션 관리자 생성 -->
+ 	<bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager" id="txManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- DAO기반으로 DAO를 작성할 경우 스프링이 아닌 마이바티스가 DAO를 생성한 후 마이바티스 스프링 연동 모듈을 사용해 스프링 빈으로 등록 -->
+	<mybatis-spring:scan base-package="com.icia.pboard.dao"/>	
+		
+	<!-- 자바메일을 지원하는 스프링 메일 설정 -->
+	<!-- 메일을 발송하려면 SMTP 서버가 필요. 서버가 없기 때문에 gmail에 메일을 전달하면 gmail이 메일 발송  -->
+	<!-- 문제점 : 메일 발송이 실패하면 우리는 알 수가 없다 -->
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="username" value="gusal8706" />
+		<property name="password" value="dhsjwn8706" />
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.smtp.starttls.enable">true</prop>
+				<prop key="mail.smtp.host">smtp.gmail.com</prop>
+				<prop key="mail.smtp.port">465</prop>
+				<prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
+				<prop key="mail.smtp.socketFactory.port">465</prop>
+				<prop key="mail.smtp.socketFactory.fallback">false</prop>
+				<prop key="mail.smtp.auth">true</prop> 
+				<prop key="mail.smtp.timeout">8500</prop>
+				<!-- log를 보고 싶다면 true. false로 하면 메일 관련 메시지가 나오지 않는다 -->
+				<prop key="mail.debug">true</prop>	
+			</props>
+		</property>
+	</bean>	
+	<bean id="modelMapper" class="org.modelmapper.ModelMapper" />
+	<bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+</beans>

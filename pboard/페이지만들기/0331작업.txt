@@ -1,0 +1,15 @@
+### 페이징 ###
+1. Page 클래스
+public class Page {
+	private Integer pageno;
+	private Integer prev;
+	private Integer begin;
+	private Integer end;
+	private Integer next;
+	private List<BoardDto.ListView> list;
+}
+
+2. PagingUtil
+	Map getRowNum(int pageno, int count) -> startRowNum, endRowNum을 저장
+	Page getPate(int pageno, int count)
+
